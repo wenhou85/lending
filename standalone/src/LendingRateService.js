@@ -10,7 +10,7 @@ class LendingRateService {
       ws: {
         autoReconnect: true,
         seqAudit: false,
-        packetWDDelay: 60 * 1000
+        packetWDDelay: 10 * 1000
       }
     });
     this.rest1 = Promise.promisifyAll(this.bfx.rest(1, {
