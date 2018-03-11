@@ -20,7 +20,7 @@ class LendingService {
       ws: {
         autoReconnect: true,
         seqAudit: false,
-        packetWDDelay: 10 * 1000
+        packetWDDelay: process.env.REFRESH_TIMER
       }
     });
 
