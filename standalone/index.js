@@ -7,7 +7,6 @@ const API_KEY = process.env.API_KEY;
 const API_SECRET = process.env.API_SECRET;
 const SLACK_VERIFICATION_TOKEN = process.env.SLACK_VERIFICATION_TOKEN;
 const PORT = process.env.PORT || 3000;
-const REFRESH_TIMER = process.env.REFRESH_TIMER;
 
 //health check for elastic beanstalk
 const express = require('express');
@@ -42,7 +41,7 @@ const bfx = new BFX({
   ws: {
     autoReconnect: true,
     seqAudit: false,
-    packetWDDelay: process.env.REFRESH_TIMER
+    packetWDDelay: 60 * 1000
   }
 });
 
