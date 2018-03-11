@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "@slack/client": "^3.16.0",
+    "big.js": "^5.0.3",
+    "bitfinex-api-node": "git://github.com/bitfinexcom/bitfinex-api-node.git",
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.2",
+    "dotenv": "^5.0.0",
+    "express": "^4.16.2",
+    "graphql-request": "^1.4.1",
+    "helmet": "^3.11.0",
+    "immutable": "^3.8.2",
+    "rxjs": "^5.5.6"
+  },
+  "devDependencies": {}
+}
