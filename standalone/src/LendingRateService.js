@@ -23,7 +23,7 @@ class LendingRateService {
     this.getRate = this.getRate.bind(this);
     //every 10 seconds calc best rate
     this.rateSubject = new Rx.BehaviorSubject({rate: this.rate, period: this.period, size: this.size});
-    Rx.Observable.interval(10000).flatMap(() => {
+    Rx.Observable.interval(60000).flatMap(() => {
       return this.getRate();
     }).subscribe(rec => {
       this.rate = rec.rate;
@@ -47,7 +47,7 @@ class LendingRateService {
       const maxPeriod = 30;
 
       //lend at a rate right below the threshold || 100k usd
-      let bookThreshold = Big(process.env.BOOK_THRESHOLD || 100000);
+      let bookThreshold = Big(process.env.BOOK_THRESHOLD || 300000);
 
       let bookCounter = Big(0);
       book.asks.some(ask => {
