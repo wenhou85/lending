@@ -75,7 +75,6 @@ gcool.request(`{
   const lendingService = new LendingService({bfxConfig, gcool, period: Number(process.env.LENDING_PERIOD), accountId: res.Account.id});
   lendingRateService.subscribe({
     next: (newRate) => {
-      lendingService.changePeriod(lendingRateService.getPeriod());
       lendingService.onUpdateRate(newRate);
     },
     error: console.log
