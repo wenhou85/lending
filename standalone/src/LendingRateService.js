@@ -18,18 +18,15 @@ class LendingRateService {
     }));
     this.gcool = gcool;
     this.rate = null;
-    this.period = process.env.LENDING_PERIOD || 2;
-    this.size = 1;
+    this.period = 2;
     this.getRate = this.getRate.bind(this);
     //every 10 seconds calc best rate
-    this.rateSubject = new Rx.BehaviorSubject({rate: this.rate, period: this.period, size: this.size});
+    this.rateSubject = new Rx.BehaviorSubject(null);
     Rx.Observable.interval(60000).flatMap(() => {
       return this.getRate();
-    }).subscribe(rec => {
-      this.rate = rec.rate;
-      this.period = rec.period;
-      this.size = rec.size;
-      this.rateSubject.next(rec);
+    }).subscribe(r => {
+      this.rate = r;
+      this.rateSubject.next(r);
     });
   }
 
@@ -43,9 +40,6 @@ class LendingRateService {
       //minimum rate which bot is willing to lend.
       const minAcceptableRate = Big(process.env.MIN_ACCEPTABLE_RATE || 3.65);
       const maxPeriodRate = Big(process.env.MAX_PERIOD_RATE || 100.00);
-      const frontRunMargin = Big(process.env.FRONT_RUN_MARGIN || 0.01825);
-      const maxPeriod = 30;
-
       //lend at a rate right below the threshold || 100k usd
       let bookThreshold = Big(process.env.BOOK_THRESHOLD || 300000);
 
@@ -64,21 +58,20 @@ class LendingRateService {
       });
 
       //0.00005*365 rate to front run the big order.
-      const finalRate = bestRate.minus(frontRunMargin);
-      let finalPeriod = Big(this.period);
-
-      if (finalRate.cmp(maxPeriodRate) === 1) {
-        finalPeriod = Big(maxPeriod);
+      if (bestRate.minus(0.01825).valueOf() >  Big(process.env.MAX_PERIOD_RATE).valueOf()) {
+        this.setPeriod(30);
+      } else {
+        this.setPeriod(Big(process.env.LENDING_PERIOD).valueOf());
       }
-
-      return {
-        rate: finalRate.valueOf(),
-        period: finalPeriod.valueOf(),
-        size: this.size
-      };
+      return bestRate.minus(0.01825).valueOf();
     });
   }
-
+  setPeriod(period){
+    this.period = period;
+  }
+  getPeriod(){
+    return this.period;
+  }
   subscribe(subObj) {
     return this.rateSubject.subscribe(subObj);
   }

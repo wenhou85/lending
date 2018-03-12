@@ -10,9 +10,10 @@ const defaultErrorHandler = (id, e) => {
 };
 
 class LendingService {
-  constructor({bfxConfig, gcool, accountId = '1', direction = 'lend', errorHandler = defaultErrorHandler}) {
+  constructor({bfxConfig, gcool, accountId = '1', period = 30, direction = 'lend', errorHandler = defaultErrorHandler}) {
     this.isOn = false;
     this.accountId = accountId;
+    this.period = period;
     this.direction = direction;
     this.bfx = new BFX({
       apiKey: bfxConfig.public,
@@ -310,21 +311,17 @@ class LendingService {
     this.isOn = false;
   }
 
-  onUpdateRate({ rate, period, size}) {
+  onUpdateRate(newRate) {
     if (!this.isOn) {
       console.log(`Lending service is ${this.isOn ? 'on' : 'off'}.`);
       return;
     }
     //handle new rate
     //check available balance over 50.00 (minimum offer size)
-    const availableAmount = Big(this.wallet.balanceAvailable);
-    const newRate = Big(rate);
-    const offerSize = availableAmount.times(size).round(2, 0);
-
-    console.log(`${this.accountId} | new daily rate: ${newRate.div(365).valueOf()} | new annual rate: ${newRate.valueOf()} | available amount: ${availableAmount.valueOf()} | offer size: ${offerSize.valueOf()} | period: ${period}`);
+    const availableAmount = Big(this.wallet.balanceAvailable).round(2, 0).valueOf();
+    console.log(`${this.accountId} | new daily rate: ${Big(newRate).div(365).valueOf()} | new annual rate: ${Big(newRate).valueOf()} | available amount: ${availableAmount} period: ${this.period}`);
     console.log(`current funding offers for ${this.accountId}`, this.fundingOffers.toJS())
-
-    if (offerSize.cmp(50.00) === 1 || this.fundingOffers.size > 0) {
+    if (Number(availableAmount) > 50.00 || this.fundingOffers.size > 0) {
       let cancelPromise;
       if (this.fundingOffers.size < 1) {
         cancelPromise = Promise.resolve();
@@ -360,9 +357,9 @@ class LendingService {
       .then(() => {
         const offerObj = {
           currency: this.currency,
-          amount: offerSize.valueOf(),
-          rate: newRate.round(2, 0).valueOf(),
-          period: Number(period),
+          amount: availableAmount,
+          rate: Big(newRate).round(2, 0).valueOf(),
+          period: this.period,
           direction: this.direction
         };
         console.log(`create new offer for ${this.accountId}`, offerObj);
@@ -389,6 +386,9 @@ class LendingService {
     .catch(err => {
       this.errorHandler(this.accountId, err);
     });
+  }
+  changePeriod(period) {
+    this.period = period;
   }
 }
 module.exports = LendingService;

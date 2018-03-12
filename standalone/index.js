@@ -60,21 +60,22 @@ const LendingService = require('./src/LendingService');
 
 gcool.request(`{
   Account(
-    id: "IBB_ACCOUNT_ID"
+    id: "${process.env.IBB_ACCOUNT_ID}"
   ) {
     id
   }
 }`)
 .then(res => {
-  if (!process.env.IBB_ACCOUNT_ID) {
+  if (!res.Account) {
     throw 'No IBB Account';
   }
   console.log('Start up!')
-  console.log(process.env.IBB_ACCOUNT_ID)
+  console.log(res.Account)
   const lendingRateService = new LendingRateService(bfxConfig, gcool);
-  const lendingService = new LendingService({bfxConfig, gcool, period: Number(process.env.LENDING_PERIOD), accountId: process.env.IBB_ACCOUNT_ID});
+  const lendingService = new LendingService({bfxConfig, gcool, period: Number(process.env.LENDING_PERIOD), accountId: res.Account.id});
   lendingRateService.subscribe({
     next: (newRate) => {
+      lendingService.changePeriod(lendingRateService.getPeriod());
       lendingService.onUpdateRate(newRate);
     },
     error: console.log
